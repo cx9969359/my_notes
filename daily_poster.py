@@ -1,22 +1,88 @@
-from numpy import *
 from datetime import datetime
+import urllib.request
+import qrcode
+
 from PIL import Image, ImageFont, ImageDraw
-import sys, os
 
 
 class Test():
     def test(self):
-        title = '声德·练就好声音'
         # 打开图片
-        image = Image.open(r'C:\Users\Administrator\Desktop\background.png')
-        # 画图
-        draw = ImageDraw.Draw(image)
+        background_img = Image.open(r'C:\Users\Administrator\Desktop\background.png')
+        draw = ImageDraw.Draw(background_img)
+
+        # 商标
+        brand = '声德·练就好声音'
+        brand_font = ImageFont.truetype('simsun.ttc', 40)
+        draw.text((30, 40), brand, font=brand_font, fill='#000000')
+
+        # 时间
+        day = str(datetime.now().day)
+        month = datetime.now().strftime('%b')
+        year = str(datetime.now().year)
+        day_font = ImageFont.truetype('simsun.ttc', 55)
+        month_and_year_font = ImageFont.truetype('simsun.ttc', 35)
+        draw.text((50, 150), day, font=day_font, fill='#000')
+        draw.text((50, 210), month, font=month_and_year_font, fill='#000')
+        draw.text((110, 210), year, font=month_and_year_font, fill='#000')
+
         # 标题
-        draw.text((20, 10), title)
-        # 内容框
-        draw.polygon([(20, 240), (350, 240), (350, 400), (20, 400)], fill='#ffffff')
-        draw.polygon([(20, 440), (350, 440), (350, 600), (20, 600)], fill='#ffffff')
-        image.show()
+        title = '你的声音里藏着你走过的路，看过的文字。'
+        title_font = ImageFont.truetype('simsun.ttc', 28)
+        draw.text((120, 350), title, font=title_font, fill='#000')
+
+        # 中部内容框
+        draw.polygon([(40, 550), (710, 550), (710, 900), (40, 900)], fill='#fff')
+        nickname = '微信昵称'
+        sign = '刚刚在【{project_name}】上完成打卡'.format(project_name='练就好声音')
+        sign_font = ImageFont.truetype('simsun.ttc', 24)
+        # 微信头像
+        # avator_url = Image.open(urllib.request.urlopen(student.avator))
+        avator_img = Image.open(r'C:\Users\Administrator\Desktop\my_avator.png')
+        background_img.paste(avator_img, (130, 580))
+        draw.text((280, 580), nickname, font=title_font, fill='#000')
+        draw.text((280, 630), sign, font=sign_font, fill='#000')
+        # 线
+        draw.line([(120, 720), (630, 720)], fill='#000', width=1)
+        # 统计标题
+        draw.text((100, 750), '累计打卡', font=sign_font, fill='#000')
+        draw.text((320, 750), '声音能量', font=sign_font, fill='#000')
+        draw.text((540, 750), '今日练习', font=sign_font, fill='#000')
+        # 统计值
+        punch_record_num = 48
+        total_coin = 398
+        practice_duration = 38
+        draw.text((100, 810), str(punch_record_num), font=day_font, fill='#000')
+        draw.text((180, 826), '篇', font=sign_font, fill='#000')
+        draw.text((320, 810), str(total_coin), font=day_font, fill='#000')
+        draw.text((400, 826), '分贝', font=sign_font, fill='#000')
+        draw.text((540, 810), str(practice_duration), font=day_font, fill='#000')
+        draw.text((620, 826), '分钟', font=sign_font, fill='#000')
+
+        # 底部内容框
+        draw.polygon([(40, 950), (710, 950), (710, 1200), (40, 1200)], fill='#fff')
+        bottom_title_font = ImageFont.truetype('simsun.ttc', 32)
+        bottom_content_font = ImageFont.truetype('simsun.ttc', 26)
+        draw.text((80, 1000), '练就好声音', font=bottom_title_font, fill='#000')
+        draw.text((80, 1050), '在这里，让声音变得更好听', font=bottom_content_font, fill='#000')
+        # 二维码提示语
+        draw.polygon([(100, 1100), (400, 1100), (400, 1150), (100, 1150)], fill='#bfbfbf')
+        draw.text((156, 1112), '长按识别二维码', font=bottom_content_font, fill='#000')
+        # 二维码
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=7,
+            border=4,
+        )
+        qr.add_data('http://baidu.com')
+        qr.make(fit=True)
+        qr_img = qr.make_image()
+        qr_img = qr_img.save('daily_attendance.png')
+        qr_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\daily_attendance.png')
+        background_img.paste(qr_img,(490,980))
+
+        background_img.show()
 
 
 if __name__ == '__main__':
