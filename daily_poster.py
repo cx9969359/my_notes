@@ -8,7 +8,7 @@ from PIL import Image, ImageFont, ImageDraw
 class Test():
     def test(self):
         # 打开图片
-        background_img = Image.open(r'C:\Users\Administrator\Desktop\background.png')
+        background_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\background.png')
         draw = ImageDraw.Draw(background_img)
 
         # 商标
@@ -38,7 +38,7 @@ class Test():
         sign_font = ImageFont.truetype('simsun.ttc', 24)
         # 微信头像
         # avator_url = Image.open(urllib.request.urlopen(student.avator))
-        avator_img = Image.open(r'C:\Users\Administrator\Desktop\my_avator.png')
+        avator_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_avator.png')
         background_img.paste(avator_img, (130, 580))
         draw.text((280, 580), nickname, font=title_font, fill='#000')
         draw.text((280, 630), sign, font=sign_font, fill='#000')
