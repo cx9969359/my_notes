@@ -1,7 +1,8 @@
-from datetime import datetime
 import urllib.request
-import qrcode
+from datetime import datetime
+from io import BytesIO
 
+import qrcode
 from PIL import Image, ImageFont, ImageDraw
 
 
@@ -38,7 +39,7 @@ class Test():
         sign_font = ImageFont.truetype('simsun.ttc', 24)
         # 微信头像
         # avator_url = Image.open(urllib.request.urlopen(student.avator))
-        avator_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_avator.png')
+        avator_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_avator.jpg')
         background_img.paste(avator_img, (130, 580))
         draw.text((280, 580), nickname, font=title_font, fill='#000')
         draw.text((280, 630), sign, font=sign_font, fill='#000')
@@ -78,11 +79,37 @@ class Test():
         qr.add_data('http://baidu.com')
         qr.make(fit=True)
         qr_img = qr.make_image()
-        qr_img = qr_img.save('daily_attendance.png')
-        qr_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\daily_attendance.png')
-        background_img.paste(qr_img,(490,980))
+        qr_img.save('daily_attendance.jpg')
+        qr_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\daily_attendance.jpg')
+        background_img.paste(qr_img, (490, 980))
+        # background_img.thumbnail((350,1000),Image.ANTIALIAS)
 
+        # 转成IO流
+        bytes_in = BytesIO()
+        background_img.save(bytes_in, format='PNG')
+        img_IO = bytes_in.getvalue()
+
+        with open(r'C:\Users\Administrator\Desktop\开发笔记\nice.png', 'wb') as f:
+            f.write(img_IO)
         background_img.show()
+
+    def create_downloadable_poster(self, poster):
+        """
+        将本地生成的二进制poster文件上传至OSS并获得key
+        :param poster:
+        :return:
+        """
+        upload_folder, file_name = self.init_upload()
+        poster_file_name = file_name + '.jpg'
+        poster_file_path = os.path.join(upload_folder, poster_file_name)
+        # 上传文件
+        with open(poster_file_path, "wb") as pdf:
+            for chunk in poster.iter_content(chunk_size=1024):
+                if chunk:
+                    pdf.write(chunk)
+        # 获取key
+        key = self.upload_file(poster_file_name, 'daily_attendance')
+        return key
 
 
 if __name__ == '__main__':
