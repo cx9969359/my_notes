@@ -1,88 +1,87 @@
+import math
+import os
 import urllib.request
 from datetime import datetime
 from io import BytesIO
 
 import qrcode
 from PIL import Image, ImageFont, ImageDraw
+import random
 
 
 class Test():
     def test(self):
         # 打开图片
-        background_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\background.png')
+        background_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\background.jpg')
+        width = 580
+        height = 1032
+        background_img = background_img.resize((width, height), Image.ANTIALIAS)
         draw = ImageDraw.Draw(background_img)
 
-        # 商标
-        brand = '声德·练就好声音'
-        brand_font = ImageFont.truetype('simsun.ttc', 40)
-        draw.text((30, 40), brand, font=brand_font, fill='#000000')
-
         # 时间
-        day = str(datetime.now().day)
-        month = datetime.now().strftime('%b')
         year = str(datetime.now().year)
-        day_font = ImageFont.truetype('simsun.ttc', 55)
-        month_and_year_font = ImageFont.truetype('simsun.ttc', 35)
-        draw.text((50, 150), day, font=day_font, fill='#000')
-        draw.text((50, 210), month, font=month_and_year_font, fill='#000')
-        draw.text((110, 210), year, font=month_and_year_font, fill='#000')
+        month = str(datetime.now().month)
+        day = str(datetime.now().day)
+        day_font = ImageFont.truetype('simsun.ttc', 39)
+        month_and_year_font = ImageFont.truetype('simsun.ttc', 20)
 
-        # 标题
-        title = '你的声音里藏着你走过的路，看过的文字。'
-        title_font = ImageFont.truetype('simsun.ttc', 28)
-        draw.text((120, 350), title, font=title_font, fill='#000')
+        draw.line([(250, 41), (330, 41)], fill='#fff', width=2)
+        draw.text((268, 50), day, font=day_font, fill='#fff')
+        draw.text((254, 95), year + '.' + month, font=month_and_year_font, fill='#fff')
+        draw.line([(250, 124), (330, 124)], fill='#fff', width=2)
+
+        # 主题
+        content = self.get_poster_motto_by_chance()
+        content_list = content.split(' ')
+        for index, content in enumerate(content_list):
+            content_font = ImageFont.truetype('simsun.ttc', 30)
+            w, h = content_font.getsize(content)
+            draw.text(((width - w) / 2, 306 + index * 50), content, font=content_font, fill='#fff')
 
         # 中部内容框
-        draw.polygon([(40, 550), (710, 550), (710, 900), (40, 900)], fill='#fff')
         nickname = '微信昵称'
         sign = '刚刚在【{project_name}】上完成打卡'.format(project_name='练就好声音')
-        sign_font = ImageFont.truetype('simsun.ttc', 24)
+        sign_font = ImageFont.truetype('simsun.ttc', 19)
         # 微信头像
         # avator_url = Image.open(urllib.request.urlopen(student.avator))
-        avator_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_avator.jpg')
-        background_img.paste(avator_img, (130, 580))
-        draw.text((280, 580), nickname, font=title_font, fill='#000')
-        draw.text((280, 630), sign, font=sign_font, fill='#000')
-        # 线
-        draw.line([(120, 720), (630, 720)], fill='#000', width=1)
+        raw_avator_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_avator.jpg')
+        raw_avator_img = raw_avator_img.resize((64, 64), Image.ANTIALIAS)
+
+        # 将头像处理成圆角矩形
+        self.crop_circle(raw_avator_img)
+        raw_avator_img.close()
+        crop_avator_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\crop_avator.png')
+        background_img.paste(crop_avator_img, (22, 838))
+
+        nickname_font = ImageFont.truetype('simsun.ttc', 26)
+        draw.text((105, 842), nickname, font=nickname_font, fill='#202020')
+        draw.text((105, 884), sign, font=sign_font, fill='#999')
         # 统计标题
-        draw.text((100, 750), '累计打卡', font=sign_font, fill='#000')
-        draw.text((320, 750), '声音能量', font=sign_font, fill='#000')
-        draw.text((540, 750), '今日练习', font=sign_font, fill='#000')
+        draw.text((22, 935), '累计打卡', font=sign_font, fill='#666')
+        draw.text((158, 935), '声音能量', font=sign_font, fill='#666')
+        draw.text((314, 935), '今日练习', font=sign_font, fill='#666')
         # 统计值
         punch_record_num = 48
         total_coin = 398
         practice_duration = 38
-        draw.text((100, 810), str(punch_record_num), font=day_font, fill='#000')
-        draw.text((180, 826), '篇', font=sign_font, fill='#000')
-        draw.text((320, 810), str(total_coin), font=day_font, fill='#000')
-        draw.text((400, 826), '分贝', font=sign_font, fill='#000')
-        draw.text((540, 810), str(practice_duration), font=day_font, fill='#000')
-        draw.text((620, 826), '分钟', font=sign_font, fill='#000')
+        statistical_font = ImageFont.truetype('simsun.ttc', 32)
+        draw.text((22, 960), str(punch_record_num), font=statistical_font, fill='#3030')
+        draw.text((70, 970), '篇', font=sign_font, fill='#666')
+        draw.text((152, 960), str(total_coin), font=statistical_font, fill='#3030')
+        draw.text((204, 970), '分贝', font=sign_font, fill='#666')
+        draw.text((314, 960), str(practice_duration), font=statistical_font, fill='#3030')
+        draw.text((350, 970), '分钟', font=sign_font, fill='#666')
 
-        # 底部内容框
-        draw.polygon([(40, 950), (710, 950), (710, 1200), (40, 1200)], fill='#fff')
-        bottom_title_font = ImageFont.truetype('simsun.ttc', 32)
-        bottom_content_font = ImageFont.truetype('simsun.ttc', 26)
-        draw.text((80, 1000), '练就好声音', font=bottom_title_font, fill='#000')
-        draw.text((80, 1050), '在这里，让声音变得更好听', font=bottom_content_font, fill='#000')
-        # 二维码提示语
-        draw.polygon([(100, 1100), (400, 1100), (400, 1150), (100, 1150)], fill='#bfbfbf')
-        draw.text((156, 1112), '长按识别二维码', font=bottom_content_font, fill='#000')
         # 二维码
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=7,
-            border=4,
-        )
-        qr.add_data('http://baidu.com')
-        qr.make(fit=True)
-        qr_img = qr.make_image()
-        qr_img.save('daily_attendance.jpg')
-        qr_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\daily_attendance.jpg')
-        background_img.paste(qr_img, (490, 980))
-        # background_img.thumbnail((350,1000),Image.ANTIALIAS)
+        self.get_daily_attendance_qr_code()
+        qr_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\qr_code_of_daily_attendance.png')
+        background_img.paste(qr_img, (456, 857))
+
+        # 二维码底部描述
+        draw.line([(436, 870), (436, 985)], fill='#ddd', width=2)
+        bottom_content_font = ImageFont.truetype('simsun.ttc', 15)
+        draw.text((456, 960), '在这里，让声', font=bottom_content_font, fill='#24bcfc')
+        draw.text((456, 980), '音变得更好听', font=bottom_content_font, fill='#24bcfc')
 
         # 转成IO流
         bytes_in = BytesIO()
@@ -92,24 +91,64 @@ class Test():
         with open(r'C:\Users\Administrator\Desktop\开发笔记\nice.png', 'wb') as f:
             f.write(img_IO)
         background_img.show()
+        background_img.close()
 
-    def create_downloadable_poster(self, poster):
+    def crop_circle(self, img):
+        # 圆角半径
+        rad = 10
+        circle = Image.new('L', (rad * 2, rad * 2), 0)
+        draw = ImageDraw.Draw(circle)
+        draw.ellipse((0, 0, rad * 2, rad * 2), fill=255)
+        alpha = Image.new('L', img.size, 255)
+        w, h = img.size
+        alpha.paste(circle.crop((0, 0, rad, rad)), (0, 0))
+        alpha.paste(circle.crop((0, rad, rad, rad * 2)), (0, h - rad))
+        alpha.paste(circle.crop((rad, 0, rad * 2, rad)), (w - rad, 0))
+        alpha.paste(circle.crop((rad, rad, rad * 2, rad * 2)), (w - rad, h - rad))
+        img.putalpha(alpha)
+        img.save('crop_avator.png')
+
+    def circle(self, img, size_x, size_y, antialias=4):
+        size_enlarge = (size_x * antialias, size_y * antialias)
+        img = img.resize((size_x, size_y))
+        mask = Image.new('L', size_enlarge, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((0, 0) + size_enlarge, fill=255)
+        mask = mask.resize(img.size, Image.ANTIALIAS)
+        img.putalpha(mask)
+        return img
+
+    def get_daily_attendance_qr_code(self):
         """
-        将本地生成的二进制poster文件上传至OSS并获得key
-        :param poster:
+        生成日签带参二维码
         :return:
         """
-        upload_folder, file_name = self.init_upload()
-        poster_file_name = file_name + '.jpg'
-        poster_file_path = os.path.join(upload_folder, poster_file_name)
-        # 上传文件
-        with open(poster_file_path, "wb") as pdf:
-            for chunk in poster.iter_content(chunk_size=1024):
-                if chunk:
-                    pdf.write(chunk)
-        # 获取key
-        key = self.upload_file(poster_file_name, 'daily_attendance')
-        return key
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=4,
+            border=1,
+        )
+        qr.add_data('http://baidu.com')
+        qr.make(fit=True)
+        qr_img = qr.make_image()
+        qr_img.save('qr_code_of_daily_attendance.png')
+
+    def get_poster_motto_by_chance(self):
+        """
+        从句子库中随机获得一句
+        :return:
+        """
+        file = open(r'C:\Users\Administrator\Desktop\开发笔记\motto.txt')
+        line_list = []
+        while True:
+            line = file.readline()
+            if not line:
+                break
+            line_list.append(line.strip())
+        file.close()
+        target_sentence = random.choice(line_list)
+        return target_sentence
 
 
 if __name__ == '__main__':
