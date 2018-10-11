@@ -1,7 +1,7 @@
 import urllib.request
 from datetime import datetime
 from io import BytesIO
-
+import os
 import qrcode
 from PIL import Image, ImageFont, ImageDraw
 
@@ -9,7 +9,7 @@ from PIL import Image, ImageFont, ImageDraw
 class Test():
     def test(self):
         # 打开图片
-        background_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_notes\background.png')
+        background_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_notes\background.jpg')
         draw = ImageDraw.Draw(background_img)
 
         # 商标
@@ -73,34 +73,31 @@ class Test():
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=7,
-            border=4,
+            box_size=4,
+            border=1,
         )
         qr.add_data('http://baidu.com')
         qr.make(fit=True)
         qr_img = qr.make_image()
         qr_img.save('daily_attendance.jpg')
-        qr_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_notes\daily_attendance.jpg')
-        background_img.paste(qr_img, (490, 980))
-        # background_img.thumbnail((350,1000),Image.ANTIALIAS)
+        qr_code_file_name = 'daily_attendance'
+        qr_code_file_path = os.getcwd() + '/{file_name}.jpg'.format(file_name=qr_code_file_name)
+        if os.path.isfile(qr_code_file_path):
+            qr_img = Image.open(qr_code_file_path)
+            background_img.paste(qr_img, (490, 980))
+            os.remove(qr_code_file_path)
+            qr_img.close()
+
+            print(666)
 
         # 转成IO流
         bytes_in = BytesIO()
         background_img.save(bytes_in, format='PNG')
         img_IO = bytes_in.getvalue()
 
-        print('===')
-        dict = {'key': img_IO}
-        print(dict)
-        print('----')
-        img_IO = dict['key']
-        picture = Image.frombuffer('RGB',(750,1000),img_IO)
-        picture.save()
-        picture = Image.open(picture)
-
-        # with open(r'C:\Users\Administrator\Desktop\开发笔记\nice.png', 'wb') as f:
-        #     f.write(img_IO)
-        picture.show()
+        with open(r'C:\Users\Administrator\Desktop\开发笔记\nice.png', 'wb') as f:
+            f.write(img_IO)
+        background_img.show()
         background_img.close()
 
     def create_downloadable_poster(self, poster):
