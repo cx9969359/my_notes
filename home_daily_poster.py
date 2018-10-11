@@ -89,9 +89,19 @@ class Test():
         background_img.save(bytes_in, format='PNG')
         img_IO = bytes_in.getvalue()
 
-        with open(r'C:\Users\Administrator\Desktop\开发笔记\nice.png', 'wb') as f:
-            f.write(img_IO)
-        background_img.show()
+        print('===')
+        dict = {'key': img_IO}
+        print(dict)
+        print('----')
+        img_IO = dict['key']
+        picture = Image.frombuffer('RGB',(750,1000),img_IO)
+        picture.save()
+        picture = Image.open(picture)
+
+        # with open(r'C:\Users\Administrator\Desktop\开发笔记\nice.png', 'wb') as f:
+        #     f.write(img_IO)
+        picture.show()
+        background_img.close()
 
     def create_downloadable_poster(self, poster):
         """
