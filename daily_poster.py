@@ -1,6 +1,7 @@
 import math
 import os
 import random
+import textwrap
 import urllib.request
 from datetime import datetime
 from io import BytesIO
@@ -11,16 +12,6 @@ from PIL import Image, ImageFont, ImageDraw
 
 class Test():
     def test(self):
-        # border = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\mask.png')
-        # flower = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\my_avator1.png')
-        # # source = border.convert('RGB')
-        # # flower.paste(source, mask=border)
-        # # flower.save('new.png')
-        #
-        # source = flower.convert('RGB')
-        # border.paste(source, mask=flower)
-        # border.save('new.png')
-
         # 打开图片
         background_img = Image.open(r'C:\Users\Administrator\Desktop\开发笔记\background.jpg')
         total_width = 580
@@ -42,17 +33,24 @@ class Test():
         draw.line([(250, 124), (330, 124)], fill='#fff', width=2)
 
         # 主题
-        content = self.get_poster_motto_by_chance()
+        content = '声音能引起心灵的共鸣好好好好 声音可以改变一个人的气质 —，威·柯珀'
         content_list = content.split(' ')
         for index, content in enumerate(content_list):
-            content_font = ImageFont.truetype('Hiragino SansGBW3.otf', 30)
-            author_font = ImageFont.truetype('Hiragino SansGBW3.otf', 22)
+            content_font = ImageFont.truetype('Hiragino SansGBW3.otf', 32)
+            author_font = ImageFont.truetype('Hiragino SansGBW3.otf', 21)
             content_w, _ = content_font.getsize(content)
-            author_w, _ = author_font.getsize(content)
             if '—' in content:
-                draw.text(((total_width - author_w) / 2, 300 + index * 54), content, font=author_font, fill='#fff')
+                split_content = content.split('，')
+                for author_index, author_content in enumerate(split_content):
+                    author_w, _ = author_font.getsize(author_content)
+                    if author_index == 0:
+                        draw.text(((total_width - author_w) / 2, 300 + index * 56), author_content, font=author_font,
+                                  fill='#fff')
+                    else:
+                        draw.text(((total_width - author_w) / 2, 300 + index * 56 + author_index * 24), author_content,
+                                  font=author_font, fill='#fff')
             else:
-                draw.text(((total_width - content_w) / 2, 300 + index * 50), content, font=content_font, fill='#fff')
+                draw.text(((total_width - content_w) / 2, 300 + index * 56), content, font=content_font, fill='#fff')
         # 中部内容框
         nickname = '微信昵称'
         sign = '刚刚在【{project_name}】上完成打卡'.format(project_name='练就好声音')
@@ -135,16 +133,6 @@ class Test():
         print(crop_avator_img_path)
         return crop_avator_img_path
 
-    def circle(self, img, size_x, size_y, antialias=4):
-        size_enlarge = (size_x * antialias, size_y * antialias)
-        img = img.resize((size_x, size_y))
-        mask = Image.new('L', size_enlarge, 0)
-        draw = ImageDraw.Draw(mask)
-        draw.ellipse((0, 0) + size_enlarge, fill=255)
-        mask = mask.resize(img.size, Image.ANTIALIAS)
-        img.putalpha(mask)
-        return img
-
     def get_daily_attendance_qr_code(self):
         """
         生成日签带参二维码
@@ -162,22 +150,6 @@ class Test():
         qr_img.save('qr_code_of_daily_attendance.jpg')
         qr_code_file_path = os.getcwd() + '/qr_code_of_daily_attendance.jpg'
         return qr_code_file_path
-
-    def get_poster_motto_by_chance(self):
-        """
-        从句子库中随机获得一句
-        :return:
-        """
-        file = open(r'C:\Users\Administrator\Desktop\开发笔记\motto.txt')
-        line_list = []
-        while True:
-            line = file.readline()
-            if not line:
-                break
-            line_list.append(line.strip())
-        file.close()
-        target_sentence = random.choice(line_list)
-        return target_sentence
 
 
 if __name__ == '__main__':
